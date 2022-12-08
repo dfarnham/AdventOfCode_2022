@@ -11,3 +11,4 @@ edition = "2021"
 nix = "0.25"
 
 [dependencies]
+clap = { version = "4", features = ["cargo"] }

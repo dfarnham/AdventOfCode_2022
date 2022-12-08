@@ -1,9 +1,9 @@
 [package]
-name = "day_04"
+name = "day_05"
 version = "0.1.0"
 authors = ["Dave Farnham <dave.farnham@icloud.com>"]
 categories = ["command-line-utilities"]
-description = "Camp Cleanup: https://adventofcode.com/2022/day/4"
+description = "Supply Stacks: https://adventofcode.com/2022/day/5"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

@@ -1,9 +1,6 @@
-use general::read_data_lines;
+use general::{get_args, read_trimmed_data_lines, reset_sigpipe};
 use std::error::Error;
 use std::io::{self, Write};
-
-// clap arg parser
-mod argparse;
 
 fn count_calories(array: &[String], n: usize) -> Result<u64, Box<dyn Error>> {
     let mut data = vec![];
@@ -25,14 +22,14 @@ fn count_calories(array: &[String], n: usize) -> Result<u64, Box<dyn Error>> {
 
 fn main() -> Result<(), Box<dyn Error>> {
     // behave like a typical unix utility
-    general::reset_sigpipe()?;
+    reset_sigpipe()?;
     let mut stdout = io::stdout().lock();
 
     // parse command line arguments
-    let args = argparse::get_args();
+    let args = get_args();
 
     // read puzzle data into a list of String
-    let puzzle_lines = read_data_lines(args.get_one::<std::path::PathBuf>("FILE"))?;
+    let puzzle_lines = read_trimmed_data_lines(args.get_one::<std::path::PathBuf>("FILE"))?;
 
     // ==============================================================
 
@@ -49,34 +46,34 @@ mod tests {
 
     fn get_data(filename: &str) -> Vec<String> {
         let file = std::path::PathBuf::from(filename);
-        read_data_lines(Some(&file)).unwrap()
+        read_trimmed_data_lines(Some(&file)).unwrap()
     }
 
     #[test]
     fn part1_example() -> Result<(), Box<dyn Error>> {
-        let data = get_data("input-example");
-        assert_eq!(count_calories(&data, 1)?, 24000);
+        let puzzle_lines = get_data("input-example");
+        assert_eq!(count_calories(&puzzle_lines, 1)?, 24000);
         Ok(())
     }
 
     #[test]
     fn part1_actual() -> Result<(), Box<dyn Error>> {
-        let data = get_data("input-actual");
-        assert_eq!(count_calories(&data, 1)?, 68467);
+        let puzzle_lines = get_data("input-actual");
+        assert_eq!(count_calories(&puzzle_lines, 1)?, 68467);
         Ok(())
     }
 
     #[test]
     fn part2_example() -> Result<(), Box<dyn Error>> {
-        let data = get_data("input-example");
-        assert_eq!(count_calories(&data, 3)?, 45000);
+        let puzzle_lines = get_data("input-example");
+        assert_eq!(count_calories(&puzzle_lines, 3)?, 45000);
         Ok(())
     }
 
     #[test]
     fn part2_actual() -> Result<(), Box<dyn Error>> {
-        let data = get_data("input-actual");
-        assert_eq!(count_calories(&data, 3)?, 203420);
+        let puzzle_lines = get_data("input-actual");
+        assert_eq!(count_calories(&puzzle_lines, 3)?, 203420);
         Ok(())
     }
 }

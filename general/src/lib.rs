@@ -1,3 +1,8 @@
+use clap::{
+    crate_description, crate_name, crate_version, value_parser, Arg, ArgMatches, ColorChoice,
+    Command,
+};
+use std::env;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::{Path, PathBuf};
@@ -31,8 +36,10 @@ where
     Ok(parsed_splits)
 }
 
-// Reads the lines of a file and returns them as a Vec of the supplied type
-pub fn read_data_lines<T>(filename: Option<&PathBuf>) -> Result<Vec<T>, Box<dyn std::error::Error>>
+// Reads the lines of a file, trims and returns them as a Vec of the supplied type
+pub fn read_trimmed_data_lines<T>(
+    filename: Option<&PathBuf>,
+) -> Result<Vec<T>, Box<dyn std::error::Error>>
 where
     T: FromStr,
     <T as FromStr>::Err: 'static,
@@ -56,6 +63,31 @@ where
     }
 }
 
+// Reads the lines of a file and returns them as a Vec of the supplied type
+pub fn read_data_lines<T>(filename: Option<&PathBuf>) -> Result<Vec<T>, Box<dyn std::error::Error>>
+where
+    T: FromStr,
+    <T as FromStr>::Err: 'static,
+    <T as FromStr>::Err: std::error::Error,
+{
+    let mut values = vec![];
+    match filename {
+        Some(file) if file.as_os_str() != "-" => {
+            for line in read_lines(file)? {
+                values.push(line?.parse::<T>()?);
+            }
+            Ok(values)
+        }
+        _ => {
+            // STDIN
+            for line in io::BufReader::new(io::stdin()).lines() {
+                values.push(line?.parse::<T>()?);
+            }
+            Ok(values)
+        }
+    }
+}
+
 // This should be called in cli apps
 pub fn reset_sigpipe() -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(target_family = "unix")]
@@ -68,4 +100,20 @@ pub fn reset_sigpipe() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
+}
+
+// Simple clap-4 arg parser
+pub fn get_args() -> ArgMatches {
+    let app = Command::new(crate_name!())
+        .version(crate_version!())
+        .about(crate_description!())
+        .color(ColorChoice::Auto)
+        .max_term_width(100)
+        .arg(
+            Arg::new("FILE")
+                .short('i')
+                .help("File to read, use '-' for standard input")
+                .value_parser(value_parser!(PathBuf)),
+        );
+    app.get_matches_from(env::args().collect::<Vec<String>>())
 }
