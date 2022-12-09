@@ -3,8 +3,8 @@ use std::collections::HashSet;
 use std::error::Error;
 use std::io::{self, Write};
 
-fn find_marker(array: &[String], window: usize) -> Result<usize, Box<dyn Error>> {
-    for (i, w) in array[0]
+fn find_marker(puzzle: &str, window: usize) -> Result<usize, Box<dyn Error>> {
+    for (i, w) in puzzle
         .chars()
         .collect::<Vec<_>>()
         .windows(window)
@@ -17,12 +17,12 @@ fn find_marker(array: &[String], window: usize) -> Result<usize, Box<dyn Error>>
     Err(Box::from("no solution"))
 }
 
-fn part1(array: &[String]) -> Result<usize, Box<dyn Error>> {
-    find_marker(array, 4)
+fn part1(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
+    find_marker(&puzzle_lines[0], 4)
 }
 
-fn part2(array: &[String]) -> Result<usize, Box<dyn Error>> {
-    find_marker(array, 14)
+fn part2(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
+    find_marker(&puzzle_lines[0], 14)
 }
 
 fn main() -> Result<(), Box<dyn Error>> {

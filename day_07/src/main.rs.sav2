@@ -1,0 +1,158 @@
+use general::{get_args, read_data_lines, reset_sigpipe};
+use std::collections::BTreeMap;
+use std::error::Error;
+use std::io::{self, Write};
+use std::path::PathBuf;
+
+#[derive(Debug)]
+enum Item {
+    Dir(PathBuf),
+    File(PathBuf, usize),
+}
+
+fn build_filesystem_view(commands: &[String]) -> Result<BTreeMap<String, Item>, Box<dyn Error>> {
+    let mut fs = BTreeMap::new();
+
+    let mut root = PathBuf::new();
+    root.push("/");
+    let mut current = root.clone();
+    fs.insert(root.display().to_string(), Item::Dir(root));
+
+    for line in commands {
+        if line.starts_with("$ cd") {
+            let arg = &line[5..];
+            let mut path = PathBuf::new();
+            if arg == ".." {
+                path.push(current.clone());
+                path.pop();
+            } else {
+                path.push(current.clone());
+                path.push(arg);
+            }
+            let s: String = path.to_string_lossy().to_string();
+            current = match fs.get(&s) {
+                Some(Item::Dir(path)) => path.to_path_buf(),
+                _ => return Err(Box::from("unknown directory")),
+            };
+        } else if line.starts_with("$ ls") {
+        } else {
+            let listing = line.split_whitespace().collect::<Vec<_>>();
+            if listing[0] == "dir" {
+                let mut path = PathBuf::new();
+                path.push(current.clone());
+                path.push(listing[1]);
+                fs.insert(path.display().to_string(), Item::Dir(path));
+            } else {
+                let mut path = PathBuf::new();
+                path.push(current.clone());
+                path.push(listing[1]);
+                fs.insert(
+                    path.display().to_string(),
+                    Item::File(path, listing[0].parse::<usize>()?),
+                );
+            }
+        }
+    }
+
+    Ok(fs)
+}
+
+fn get_dir_size(key: &str, fs: &BTreeMap<String, Item>) -> usize {
+    fs.iter()
+        .filter(|(_, v)| matches!(v, Item::File(_, _)))
+        .filter(|(f, _)| f.starts_with(key))
+        .map(|(_, i)| match i {
+            Item::File(_, s) => *s,
+            _ => 0,
+        })
+        .sum::<usize>()
+}
+
+fn part1(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
+    let fs = build_filesystem_view(puzzle_lines)?;
+    Ok(fs
+        .iter()
+        .filter(|(_, v)| matches!(v, Item::Dir(_)))
+        .map(|(k, _)| match k == "/" {
+            true => k.to_string(),
+            false => k.to_string() + "/",
+        })
+        .collect::<Vec<String>>()
+        .iter()
+        .map(|d| get_dir_size(&d, &fs))
+        .filter(|s| *s <= 100000)
+        .sum::<usize>())
+}
+
+fn part2(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
+    let fs = build_filesystem_view(puzzle_lines)?;
+    let free = 70000000 - get_dir_size("/", &fs);
+    Ok(fs
+        .iter()
+        .filter(|(_, v)| matches!(v, Item::Dir(_)))
+        .map(|(k, _)| match k == "/" {
+            true => k.to_string(),
+            false => k.to_string() + "/",
+        })
+        .collect::<Vec<String>>()
+        .iter()
+        .map(|d| get_dir_size(&d, &fs))
+        .filter(|s| free + *s >= 30000000)
+        .min().expect("no solution"))
+}
+
+fn main() -> Result<(), Box<dyn Error>> {
+    // behave like a typical unix utility
+    reset_sigpipe()?;
+    let mut stdout = io::stdout().lock();
+
+    // parse command line arguments
+    let args = get_args();
+
+    // read puzzle data into a list of String
+    let puzzle_lines = read_data_lines(args.get_one::<std::path::PathBuf>("FILE"))?;
+
+    // ==============================================================
+
+    writeln!(stdout, "Answer Part 1 = {}", part1(&puzzle_lines)?)?;
+    writeln!(stdout, "Answer Part 2 = {}", part2(&puzzle_lines)?)?;
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn get_data(filename: &str) -> Vec<String> {
+        let file = std::path::PathBuf::from(filename);
+        read_data_lines(Some(&file)).unwrap()
+    }
+
+    #[test]
+    fn part1_example() -> Result<(), Box<dyn Error>> {
+        let puzzle_lines = get_data("input-example");
+        assert_eq!(part1(&puzzle_lines)?, 95437);
+        Ok(())
+    }
+
+    #[test]
+    fn part1_actual() -> Result<(), Box<dyn Error>> {
+        let puzzle_lines = get_data("input-actual");
+        assert_eq!(part1(&puzzle_lines)?, 1778099);
+        Ok(())
+    }
+
+    #[test]
+    fn part2_example() -> Result<(), Box<dyn Error>> {
+        let puzzle_lines = get_data("input-example");
+        assert_eq!(part2(&puzzle_lines)?, 24933642);
+        Ok(())
+    }
+
+    #[test]
+    fn part2_actual() -> Result<(), Box<dyn Error>> {
+        let puzzle_lines = get_data("input-actual");
+        assert_eq!(part2(&puzzle_lines)?, 1623571);
+        Ok(())
+    }
+}

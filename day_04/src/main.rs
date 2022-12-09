@@ -3,8 +3,8 @@ use std::error::Error;
 use std::io::{self, Write};
 use std::ops::RangeInclusive;
 
-fn ranges(array: &[String]) -> Vec<(RangeInclusive<u64>, RangeInclusive<u64>)> {
-    array
+fn ranges(puzzle_lines: &[String]) -> Vec<(RangeInclusive<u64>, RangeInclusive<u64>)> {
+    puzzle_lines
         .iter()
         .map(|line| trim_split_on::<String>(line, ',').unwrap())
         .map(|start_end| {
@@ -17,8 +17,8 @@ fn ranges(array: &[String]) -> Vec<(RangeInclusive<u64>, RangeInclusive<u64>)> {
         .collect()
 }
 
-fn part1(array: &[String]) -> Result<u64, Box<dyn Error>> {
-    Ok(ranges(array)
+fn part1(puzzle_lines: &[String]) -> Result<u64, Box<dyn Error>> {
+    Ok(ranges(puzzle_lines)
         .iter()
         .filter(|r| {
             r.1.contains(r.0.start()) && r.1.contains(r.0.end())
@@ -27,8 +27,8 @@ fn part1(array: &[String]) -> Result<u64, Box<dyn Error>> {
         .count() as u64)
 }
 
-fn part2(array: &[String]) -> Result<u64, Box<dyn Error>> {
-    Ok(ranges(array)
+fn part2(puzzle_lines: &[String]) -> Result<u64, Box<dyn Error>> {
+    Ok(ranges(puzzle_lines)
         .iter()
         .filter(|r| {
             r.1.contains(r.0.start())

@@ -3,9 +3,9 @@ use std::collections::BTreeMap;
 use std::error::Error;
 use std::io::{self, Write};
 
-fn build_stacks(array: &[String]) -> BTreeMap<usize, Vec<char>> {
+fn build_stacks(puzzle_lines: &[String]) -> BTreeMap<usize, Vec<char>> {
     let mut stacks = BTreeMap::new();
-    for line in array.iter() {
+    for line in puzzle_lines.iter() {
         if line.starts_with(" 1") {
             break;
         }
@@ -21,7 +21,7 @@ fn build_stacks(array: &[String]) -> BTreeMap<usize, Vec<char>> {
 }
 
 fn move_crates(
-    array: &[String],
+    puzzle_lines: &[String],
     stacks: &BTreeMap<usize, Vec<char>>,
     challenge: usize, // 1 or 2
 ) -> Result<String, Box<dyn Error>> {
@@ -40,11 +40,11 @@ fn move_crates(
     // stacks: {0: ['Z', 'N'], 1: ['M', 'C', 'D'], 2: ['P']}
     //
     // compute the maximum vector length and skip(n + 2) lines
-    // from the input array to start reading the move instructions
+    // from the input puzzle_lines to start reading the move instructions
     let n = stacks.values().map(|v| v.len()).max().ok_or("max error")?;
     let mut stacks = stacks.clone();
 
-    for line in array.iter().skip(n + 2) {
+    for line in puzzle_lines.iter().skip(n + 2) {
         let instructions = line.split_whitespace().collect::<Vec<_>>();
         let count = instructions[1].parse::<usize>()?;
         let source = instructions[3].parse::<usize>()? - 1;
@@ -72,12 +72,12 @@ fn move_crates(
         .join(""))
 }
 
-fn part1(array: &[String], stacks: &BTreeMap<usize, Vec<char>>) -> Result<String, Box<dyn Error>> {
-    move_crates(array, stacks, 1)
+fn part1(puzzle_lines: &[String], stacks: &BTreeMap<usize, Vec<char>>) -> Result<String, Box<dyn Error>> {
+    move_crates(puzzle_lines, stacks, 1)
 }
 
-fn part2(array: &[String], stacks: &BTreeMap<usize, Vec<char>>) -> Result<String, Box<dyn Error>> {
-    move_crates(array, stacks, 2)
+fn part2(puzzle_lines: &[String], stacks: &BTreeMap<usize, Vec<char>>) -> Result<String, Box<dyn Error>> {
+    move_crates(puzzle_lines, stacks, 2)
 }
 
 fn main() -> Result<(), Box<dyn Error>> {

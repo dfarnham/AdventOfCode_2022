@@ -10,9 +10,9 @@ const WIN: u64 = 6;
 const LOSE: u64 = 0;
 const DRAW: u64 = 3;
 
-fn game(array: &[String]) -> Result<u64, Box<dyn Error>> {
+fn game(puzzle_lines: &[String]) -> Result<u64, Box<dyn Error>> {
     let mut total = 0;
-    for line in array.iter() {
+    for line in puzzle_lines.iter() {
         let mut choices = line.chars();
         let (player1, _, player2) = (choices.next(), choices.next(), choices.next());
         total += match player2 {
@@ -36,13 +36,13 @@ fn game(array: &[String]) -> Result<u64, Box<dyn Error>> {
     Ok(total)
 }
 
-fn part1(array: &[String]) -> Result<u64, Box<dyn Error>> {
-    game(array)
+fn part1(puzzle_lines: &[String]) -> Result<u64, Box<dyn Error>> {
+    game(puzzle_lines)
 }
 
-fn part2(array: &[String]) -> Result<u64, Box<dyn Error>> {
+fn part2(puzzle_lines: &[String]) -> Result<u64, Box<dyn Error>> {
     let mut total = 0;
-    for line in array.iter() {
+    for line in puzzle_lines.iter() {
         let mut choices = line.chars();
         let (player1, _, player2) = (choices.next(), choices.next(), choices.next());
         total += match player2 {

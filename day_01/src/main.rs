@@ -2,11 +2,11 @@ use general::{get_args, read_trimmed_data_lines, reset_sigpipe};
 use std::error::Error;
 use std::io::{self, Write};
 
-fn count_calories(array: &[String], n: usize) -> Result<u64, Box<dyn Error>> {
+fn count_calories(puzzle_lines: &[String], n: usize) -> Result<u64, Box<dyn Error>> {
     let mut data = vec![];
     let mut total = 0;
 
-    for line in array.iter() {
+    for line in puzzle_lines.iter() {
         if line.is_empty() {
             data.push(total);
             total = 0;

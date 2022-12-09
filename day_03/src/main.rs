@@ -12,8 +12,8 @@ fn value(set: &HashSet<char>) -> u64 {
         .sum::<u64>()
 }
 
-fn part1(array: &[String]) -> Result<u64, Box<dyn Error>> {
-    Ok(array
+fn part1(puzzle_lines: &[String]) -> Result<u64, Box<dyn Error>> {
+    Ok(puzzle_lines
         .iter()
         .map(|line| {
             let set1: HashSet<char> = line.chars().take(line.len() / 2).collect();
@@ -23,10 +23,10 @@ fn part1(array: &[String]) -> Result<u64, Box<dyn Error>> {
         .sum::<u64>())
 }
 
-fn part2(array: &[String]) -> Result<u64, Box<dyn Error>> {
+fn part2(puzzle_lines: &[String]) -> Result<u64, Box<dyn Error>> {
     let mut total = 0;
     let mut set = HashSet::new();
-    for (i, line) in array.iter().enumerate() {
+    for (i, line) in puzzle_lines.iter().enumerate() {
         let line_set: HashSet<char> = line.chars().collect();
         set = match set.is_empty() {
             true => line_set.clone(),
