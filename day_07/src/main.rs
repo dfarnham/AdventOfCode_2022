@@ -6,16 +6,21 @@ use std::path::PathBuf;
 
 #[derive(Debug)]
 enum Item {
-    Dir(PathBuf),
-    File(usize),
+    File(PathBuf, usize),
+}
+impl Item {
+    fn size(&self) -> usize {
+        match self {
+            Self::File(_, size) => *size,
+        }
+    }
 }
 
 fn build_filesystem_view(commands: &[String]) -> Result<BTreeMap<String, Item>, Box<dyn Error>> {
     let mut fs = BTreeMap::new();
-
     let mut root = PathBuf::new();
     root.push("/");
-    fs.insert(root.display().to_string(), Item::Dir(root.clone()));
+    fs.insert(root.display().to_string(), Item::File(root.clone(), 0));
 
     for line in commands {
         if line.starts_with("$ ls") {
@@ -25,8 +30,8 @@ fn build_filesystem_view(commands: &[String]) -> Result<BTreeMap<String, Item>, 
         let mut path = PathBuf::new();
         path.push(root.clone());
 
-        // hash key: generate a string from a path
-        let hk = |path: PathBuf| path.display().to_string();
+        // hash key: path as a string
+        let hashkey = |path: PathBuf| path.display().to_string();
 
         if line.starts_with("$ cd") {
             // update path
@@ -39,11 +44,11 @@ fn build_filesystem_view(commands: &[String]) -> Result<BTreeMap<String, Item>, 
                 }
             }
 
-            // add a Dir
-            let hashkey = hk(path.clone());
-            root = match fs.get(&hashkey) {
-                Some(Item::Dir(path)) => path.to_path_buf(),
-                _ => return Err(Box::from("unknown directory")),
+            // set the root pointer from the path
+            let pathkey = hashkey(path.clone());
+            root = match fs.get(&pathkey) {
+                Some(Item::File(path, _)) => path.to_path_buf(),
+                _ => return Err(Box::from(format!("Unknown directory: {pathkey}"))),
             };
         } else {
             let mut listing = line.split_whitespace();
@@ -51,15 +56,13 @@ fn build_filesystem_view(commands: &[String]) -> Result<BTreeMap<String, Item>, 
                 // update path
                 path.push(name);
 
-                // add a Dir or File
-                let hashkey = hk(path.clone());
-                fs.insert(
-                    hashkey,
-                    match attr == "dir" {
-                        true => Item::Dir(path),
-                        false => Item::File(attr.parse::<usize>()?),
-                    },
-                );
+                // insert the full path of the item with a size: dir(0) or filesize
+                let pathkey = hashkey(path.clone());
+                let size = match attr == "dir" {
+                    true => 0,
+                    false => attr.parse::<usize>()?,
+                };
+                fs.insert(pathkey, Item::File(path, size));
             }
         }
     }
@@ -69,18 +72,13 @@ fn build_filesystem_view(commands: &[String]) -> Result<BTreeMap<String, Item>, 
 
 fn get_dir_size(dir: &str, fs: &BTreeMap<String, Item>) -> usize {
     fs.iter()
-        .filter(|(_, item)| matches!(item, Item::File(_)))
         .filter(|(path, _)| path.starts_with(dir))
-        .map(|(_, item)| match item {
-            Item::File(size) => *size,
-            _ => panic!("impossible - already filtered on matches!"),
-        })
+        .map(|(_, item)| item.size())
         .sum::<usize>()
 }
 
 fn get_dir_sizes(fs: &BTreeMap<String, Item>) -> Vec<usize> {
     fs.iter()
-        .filter(|(_, item)| matches!(item, Item::Dir(_)))
         .map(|(path, _)| get_dir_size(&(path.to_owned() + "/"), fs))
         .collect::<Vec<_>>()
 }
