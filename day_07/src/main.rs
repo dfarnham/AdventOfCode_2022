@@ -15,35 +15,50 @@ fn build_filesystem_view(commands: &[String]) -> Result<BTreeMap<String, Item>, 
 
     let mut root = PathBuf::new();
     root.push("/");
-    let mut current = root.clone();
-    fs.insert(root.display().to_string(), Item::Dir(root));
+    fs.insert(root.display().to_string(), Item::Dir(root.clone()));
 
     for line in commands {
+        if line.starts_with("$ ls") {
+            continue;
+        }
+
         let mut path = PathBuf::new();
-        path.push(current.clone());
+        path.push(root.clone());
+
+        // hash key: generate a string from a path
+        let hk = |path: PathBuf| path.display().to_string();
 
         if line.starts_with("$ cd") {
-            let arg = &line[5..];
-            if arg == ".." {
-                path.pop();
-            } else {
-                path.push(arg);
+            // update path
+            match &line[5..] {
+                arg if arg == ".." => {
+                    path.pop();
+                }
+                arg => {
+                    path.push(arg);
+                }
             }
-            current = match fs.get(&path.to_string_lossy().to_string()) {
+
+            // add a Dir
+            let hashkey = hk(path.clone());
+            root = match fs.get(&hashkey) {
                 Some(Item::Dir(path)) => path.to_path_buf(),
                 _ => return Err(Box::from("unknown directory")),
             };
-        } else if line.starts_with("$ ls") {
         } else {
-            let listing = line.split_whitespace().collect::<Vec<_>>();
-            if listing[0] == "dir" {
-                path.push(listing[1]);
-                fs.insert(path.display().to_string(), Item::Dir(path));
-            } else {
-                path.push(listing[1]);
+            let mut listing = line.split_whitespace();
+            if let (Some(attr), Some(name)) = (listing.next(), listing.next()) {
+                // update path
+                path.push(name);
+
+                // add a Dir or File
+                let hashkey = hk(path.clone());
                 fs.insert(
-                    path.display().to_string(),
-                    Item::File(listing[0].parse::<usize>()?),
+                    hashkey,
+                    match attr == "dir" {
+                        true => Item::Dir(path),
+                        false => Item::File(attr.parse::<usize>()?),
+                    },
                 );
             }
         }
