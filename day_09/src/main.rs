@@ -4,72 +4,56 @@ use std::error::Error;
 use std::io::{self, Write};
 
 fn get_pos(t: (i32, i32), m: (i32, i32)) -> (i32, i32) {
-    // same row
-    if t.0 == m.0 {
-        match m.1 - t.1 {
-            n if n > 1 => (t.0, t.1 + 1),
-            n if n < -1 => (t.0, t.1 - 1),
-            _ => t,
+    match ((t.0 - m.0).abs(), (t.1 - m.1).abs()) {
+        (0, 0) | (0, 1) | (1, 0) | (1, 1) => t,
+        _ => {
+            // same row
+            if t.0 == m.0 {
+                (t.0, if m.1 > t.1 { t.1 + 1 } else { t.1 - 1 })
+            // same column
+            } else if t.1 == m.1 {
+                (if m.0 > t.0 { t.0 + 1 } else { t.0 - 1 }, t.1)
+            // diagonal
+            } else if (t.0 - m.0).abs() > 1 && (t.1 - m.1).abs() > 1 {
+                (
+                    if m.0 > t.0 { t.0 + 1 } else { t.0 - 1 },
+                    if m.1 > t.1 { t.1 + 1 } else { t.1 - 1 },
+                )
+            } else if (t.0 - m.0).abs() > 1 {
+                (if m.0 > t.0 { t.0 + 1 } else { t.0 - 1 }, m.1)
+            } else {
+                (m.0, if m.1 > t.1 { t.1 + 1 } else { t.1 - 1 })
+            }
         }
-    // same column
-    } else if t.1 == m.1 {
-        match m.0 - t.0 {
-            n if n > 1 => (t.0 + 1, t.1),
-            n if n < -1 => (t.0 - 1, t.1),
-            _ => t,
-        }
-    // diagonal
-    } else if (t.0 - m.0).abs() > 1 || (t.1 - m.1).abs() > 1 {
-        if (t.0 - m.0).abs() > 1 && (t.1 - m.1).abs() > 1 {
-            (
-                if m.0 > t.0 { t.0 + 1 } else { t.0 - 1 },
-                if m.1 > t.1 { t.1 + 1 } else { t.1 - 1 },
-            )
-        } else if m.0 - t.0 > 1 {
-            (t.0 + 1, m.1)
-        } else if t.0 - m.0 > 1 {
-            (t.0 - 1, m.1)
-        } else if m.1 - t.1 > 1 {
-            (m.0, t.1 + 1)
-        } else {
-            (m.0, t.1 - 1)
-        }
-    // distance 1, (t.0 - m.0).abs(), (t.1 - m.1).abs() == (1, 1)
-    } else {
-        t
     }
 }
 
-fn iterate(v: &Vec<(i32, i32)>, m: (i32, i32)) -> Vec<(i32, i32)> {
+fn move_head(v: &[(i32, i32)], m: (i32, i32)) -> Vec<(i32, i32)> {
     let mut newvec = vec![m];
-    let n = v.len();
-    for i in 1..n {
-        newvec.push(get_pos(v[i], newvec[i - 1]));
+    for t in v[1..].iter() {
+        newvec.push(get_pos(*t, *newvec.last().unwrap()));
     }
     newvec
 }
 
-fn coverage(puzzle_lines: &[String], knots: usize) -> Result<usize, Box<dyn Error>> {
+fn coverage(puzzle_lines: &[String], n: usize) -> Result<usize, Box<dyn Error>> {
     let mut mat = HashSet::new();
-    let mut rope = (0..knots).map(|_| (0, 0)).collect::<Vec<(_, _)>>();
-    mat.insert(rope[knots - 1]);
+    let mut knots = (0..n).map(|_| (0, 0)).collect::<Vec<(_, _)>>();
 
+    mat.insert(knots[n - 1]);
     for line in puzzle_lines {
         let mut cmd = line.split_whitespace();
         if let (Some(direction), Some(distance)) = (cmd.next(), cmd.next()) {
-            let distance = distance.parse::<usize>()?;
-            let mut row = 0;
-            let mut col = 0;
-            match direction {
-                "R" => col = 1,
-                "L" => col = -1,
-                "U" => row = 1,
-                _ => row = -1,
-            }
-            for _ in 0..distance {
-                let m = (rope[0].0 + row, rope[0].1 + col);
-                rope = iterate(&rope, m);
-                mat.insert(rope[knots - 1]);
+            let (row, col) = match direction {
+                "R" => (0, 1),
+                "L" => (0, -1),
+                "U" => (1, 0),
+                "D" => (-1, 0),
+                _ => return Err(Box::from(format!("Unknown direction: {direction}"))),
+            };
+            for _ in 0..distance.parse::<usize>()? {
+                knots = move_head(&knots, (knots[0].0 + row, knots[0].1 + col));
+                mat.insert(knots[n - 1]);
             }
         }
     }
