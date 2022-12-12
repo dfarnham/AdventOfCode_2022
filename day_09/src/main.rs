@@ -6,25 +6,12 @@ use std::io::{self, Write};
 fn get_pos(t: (i32, i32), m: (i32, i32)) -> (i32, i32) {
     match ((t.0 - m.0).abs(), (t.1 - m.1).abs()) {
         (0, 0) | (0, 1) | (1, 0) | (1, 1) => t,
-        _ => {
-            // same row
-            if t.0 == m.0 {
-                (t.0, if m.1 > t.1 { t.1 + 1 } else { t.1 - 1 })
-            // same column
-            } else if t.1 == m.1 {
-                (if m.0 > t.0 { t.0 + 1 } else { t.0 - 1 }, t.1)
-            // diagonal
-            } else if (t.0 - m.0).abs() > 1 && (t.1 - m.1).abs() > 1 {
-                (
-                    if m.0 > t.0 { t.0 + 1 } else { t.0 - 1 },
-                    if m.1 > t.1 { t.1 + 1 } else { t.1 - 1 },
-                )
-            } else if (t.0 - m.0).abs() > 1 {
-                (if m.0 > t.0 { t.0 + 1 } else { t.0 - 1 }, m.1)
-            } else {
-                (m.0, if m.1 > t.1 { t.1 + 1 } else { t.1 - 1 })
-            }
-        }
+        (r, c) if r > 1 && c > 1 => (
+            if m.0 > t.0 { t.0 + 1 } else { t.0 - 1 },
+            if m.1 > t.1 { t.1 + 1 } else { t.1 - 1 },
+        ),
+        (r, _) if r > 1 => (if m.0 > t.0 { t.0 + 1 } else { t.0 - 1 }, m.1),
+        _ => (m.0, if m.1 > t.1 { t.1 + 1 } else { t.1 - 1 }),
     }
 }
 
