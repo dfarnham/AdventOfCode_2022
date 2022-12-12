@@ -3,38 +3,57 @@ use std::collections::HashSet;
 use std::error::Error;
 use std::io::{self, Write};
 
-fn get_pos(h: (i32, i32), t: (i32, i32), p: (i32, i32)) -> (i32, i32) {
+fn get_pos(t: (i32, i32), m: (i32, i32)) -> (i32, i32) {
     // same row
-    if t.0 == p.0 {
-        match p.1 - t.1 {
+    if t.0 == m.0 {
+        match m.1 - t.1 {
             n if n > 1 => (t.0, t.1 + 1),
             n if n < -1 => (t.0, t.1 - 1),
             _ => t,
         }
     // same column
-    } else if t.1 == p.1 {
-        match p.0 - t.0 {
+    } else if t.1 == m.1 {
+        match m.0 - t.0 {
             n if n > 1 => (t.0 + 1, t.1),
             n if n < -1 => (t.0 - 1, t.1),
             _ => t,
         }
-    // > 1 row or column, move to old head
-    } else if p.0 > t.0 && p.0 - t.0 > 1
-        || t.0 > p.0 && t.0 - p.0 > 1
-        || p.1 > t.1 && p.1 - t.1 > 1
-        || t.1 > p.1 && t.1 - p.1 > 1
-    {
-        h
+    // diagonal
+    } else if (t.0 - m.0).abs() > 1 || (t.1 - m.1).abs() > 1 {
+        if (t.0 - m.0).abs() > 1 && (t.1 - m.1).abs() > 1 {
+            (
+                if m.0 > t.0 { t.0 + 1 } else { t.0 - 1 },
+                if m.1 > t.1 { t.1 + 1 } else { t.1 - 1 },
+            )
+        } else if m.0 - t.0 > 1 {
+            (t.0 + 1, m.1)
+        } else if t.0 - m.0 > 1 {
+            (t.0 - 1, m.1)
+        } else if m.1 - t.1 > 1 {
+            (m.0, t.1 + 1)
+        } else {
+            (m.0, t.1 - 1)
+        }
+    // distance 1, (t.0 - m.0).abs(), (t.1 - m.1).abs() == (1, 1)
     } else {
         t
     }
 }
 
-fn coverage(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
+fn iterate(v: &Vec<(i32, i32)>, m: (i32, i32)) -> Vec<(i32, i32)> {
+    let mut newvec = vec![m];
+    let n = v.len();
+    for i in 1..n {
+        newvec.push(get_pos(v[i], newvec[i - 1]));
+    }
+    newvec
+}
+
+fn coverage(puzzle_lines: &[String], knots: usize) -> Result<usize, Box<dyn Error>> {
     let mut mat = HashSet::new();
-    let mut h = (0, 0);
-    let mut t = (0, 0);
-    mat.insert(t);
+    let mut rope = (0..knots).map(|_| (0, 0)).collect::<Vec<(_, _)>>();
+    mat.insert(rope[knots - 1]);
+
     for line in puzzle_lines {
         let mut cmd = line.split_whitespace();
         if let (Some(direction), Some(distance)) = (cmd.next(), cmd.next()) {
@@ -48,10 +67,9 @@ fn coverage(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
                 _ => row = -1,
             }
             for _ in 0..distance {
-                let p = (h.0 + row, h.1 + col);
-                t = get_pos(h, t, p);
-                mat.insert(t);
-                h = p;
+                let m = (rope[0].0 + row, rope[0].1 + col);
+                rope = iterate(&rope, m);
+                mat.insert(rope[knots - 1]);
             }
         }
     }
@@ -59,12 +77,11 @@ fn coverage(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
 }
 
 fn part1(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
-    coverage(puzzle_lines)
+    coverage(puzzle_lines, 2)
 }
 
 fn part2(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
-    //coverage(puzzle_lines)
-    Ok(0)
+    coverage(puzzle_lines, 10)
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -108,19 +125,24 @@ mod tests {
         Ok(())
     }
 
-    /*
     #[test]
     fn part2_example() -> Result<(), Box<dyn Error>> {
         let puzzle_lines = get_data("input-example");
-        assert_eq!(part2(&puzzle_lines)?, 0);
+        assert_eq!(part2(&puzzle_lines)?, 1);
+        Ok(())
+    }
+
+    #[test]
+    fn part2_example2() -> Result<(), Box<dyn Error>> {
+        let puzzle_lines = get_data("input-example2");
+        assert_eq!(part2(&puzzle_lines)?, 36);
         Ok(())
     }
 
     #[test]
     fn part2_actual() -> Result<(), Box<dyn Error>> {
         let puzzle_lines = get_data("input-actual");
-        assert_eq!(part2(&puzzle_lines)?, 0);
+        assert_eq!(part2(&puzzle_lines)?, 2627);
         Ok(())
     }
-    */
 }
