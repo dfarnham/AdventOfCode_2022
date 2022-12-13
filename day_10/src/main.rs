@@ -34,7 +34,7 @@ fn signal_strength(puzzle_lines: &[String]) -> Result<i32, Box<dyn Error>> {
         .sum::<i32>())
 }
 
-fn crt(puzzle_lines: &[String]) -> Result<Vec<BTreeSet<i32>>, Box<dyn Error>> {
+fn crt(puzzle_lines: &[String]) -> Result<Vec<BTreeSet<usize>>, Box<dyn Error>> {
     let crt_width = 40;
     let mut clock: usize = 0;
     let mut register = 1;
@@ -43,8 +43,8 @@ fn crt(puzzle_lines: &[String]) -> Result<Vec<BTreeSet<i32>>, Box<dyn Error>> {
     let mut screen = vec![];
 
     for line in puzzle_lines {
-        let t = (clock % crt_width) as i32;
-        if sprite.contains(&t) {
+        let t = clock % crt_width;
+        if sprite.contains(&(t as i32)) {
             lit.insert(t);
         }
         clock += 1;
@@ -57,8 +57,8 @@ fn crt(puzzle_lines: &[String]) -> Result<Vec<BTreeSet<i32>>, Box<dyn Error>> {
                         screen.push(lit.clone());
                         lit.clear();
                     }
-                    let t = (clock % crt_width) as i32;
-                    if sprite.contains(&t) {
+                    let t = clock % crt_width;
+                    if sprite.contains(&(t as i32)) {
                         lit.insert(t);
                     }
                     clock += 1;
@@ -77,9 +77,9 @@ fn crt(puzzle_lines: &[String]) -> Result<Vec<BTreeSet<i32>>, Box<dyn Error>> {
     Ok(screen)
 }
 
-fn display(screen: &Vec<BTreeSet<i32>>) {
+fn display(screen: &Vec<BTreeSet<usize>>) {
     for set in screen {
-        for p in 0..40_i32 {
+        for p in 0..40 {
             print!("{}", if set.contains(&p) { "#" } else { "." });
         }
         println!();
@@ -90,7 +90,7 @@ fn part1(puzzle_lines: &[String]) -> Result<i32, Box<dyn Error>> {
     signal_strength(puzzle_lines)
 }
 
-fn part2(puzzle_lines: &[String]) -> Result<Vec<BTreeSet<i32>>, Box<dyn Error>> {
+fn part2(puzzle_lines: &[String]) -> Result<Vec<BTreeSet<usize>>, Box<dyn Error>> {
     crt(puzzle_lines)
 }
 
