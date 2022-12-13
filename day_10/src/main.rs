@@ -74,14 +74,16 @@ fn crt(puzzle_lines: &[String]) -> Result<Vec<BTreeSet<i32>>, Box<dyn Error>> {
             lit.clear();
         }
     }
+    Ok(screen)
+}
 
-    for set in &screen {
-        for p in 0..crt_width as i32 {
+fn display(screen: &Vec<BTreeSet<i32>>) {
+    for set in screen {
+        for p in 0..40_i32 {
             print!("{}", if set.contains(&p) { "#" } else { "." });
         }
         println!();
     }
-    Ok(screen)
 }
 
 fn part1(puzzle_lines: &[String]) -> Result<i32, Box<dyn Error>> {
@@ -106,7 +108,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     // ==============================================================
 
     writeln!(stdout, "Answer Part 1 = {}", part1(&puzzle_lines)?)?;
-    writeln!(stdout, "Answer Part 2 = {}", part2(&puzzle_lines)?.len())?;
+    let output = part2(&puzzle_lines)?;
+    display(&output);
+    writeln!(stdout, "Answer Part 2 = {}", output.len())?;
     Ok(())
 }
 
