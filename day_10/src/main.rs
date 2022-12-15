@@ -80,7 +80,7 @@ fn crt(puzzle_lines: &[String]) -> Result<Vec<BTreeSet<usize>>, Box<dyn Error>> 
 fn display(screen: &Vec<BTreeSet<usize>>) {
     for set in screen {
         for p in 0..40 {
-            print!("{}", if set.contains(&p) { "#" } else { "." });
+            print!("{}", if set.contains(&p) { "#" } else { " " });
         }
         println!();
     }
