@@ -17,7 +17,7 @@ fn get_grid(data: &[String]) -> (Array2<usize>, (usize, usize), (usize, usize)) 
 
     // process data[..]
     for line in data {
-        grid.push_row(ArrayView::from(&get_row(line))).unwrap();
+        grid.push_row(ArrayView::from(&get_row(line))).unwrap()
     }
 
     let mut start = (0, 0);
@@ -26,10 +26,10 @@ fn get_grid(data: &[String]) -> (Array2<usize>, (usize, usize), (usize, usize)) 
         for j in 0..grid.ncols() {
             if grid[[i, j]] == 'S' as usize - 'A' as usize {
                 start = (i, j);
-                grid[[i, j]] = 'a' as usize - 'A' as usize;
+                grid[[i, j]] = 'a' as usize - 'A' as usize
             } else if grid[[i, j]] == 'E' as usize - 'A' as usize {
                 end = (i, j);
-                grid[[i, j]] = 'z' as usize - 'A' as usize;
+                grid[[i, j]] = 'z' as usize - 'A' as usize
             }
         }
     }
@@ -44,22 +44,22 @@ fn neighbor_indices(m: &Array2<usize>, p: (usize, usize)) -> Vec<(usize, usize)>
 
     // above
     if i > 0 && m[[i - 1, j]] <= maxval {
-        indices.push((i - 1, j));
+        indices.push((i - 1, j))
     }
 
     // left
     if j > 0 && m[[i, j - 1]] <= maxval {
-        indices.push((i, j - 1));
+        indices.push((i, j - 1))
     }
 
     // below
     if i < m.nrows() - 1 && m[[i + 1, j]] <= maxval {
-        indices.push((i + 1, j));
+        indices.push((i + 1, j))
     }
 
     // right
     if j < m.ncols() - 1 && m[[i, j + 1]] <= maxval {
-        indices.push((i, j + 1));
+        indices.push((i, j + 1))
     }
 
     indices
@@ -71,14 +71,14 @@ fn solve(m: &Array2<usize>, s: (usize, usize), e: (usize, usize), part: usize) -
     // insert the starting position into the queue
     let mut q = VecDeque::new();
     if part == 1 {
-        q.push_back((s, 0));
+        q.push_back((s, 0))
     } else {
         // insert the indicies of all 'm' values matching the value at the
         // starting indicies (all indicies with value 'a' in this puzzle)
         for i in 0..m.nrows() {
             for j in 0..m.ncols() {
                 if m[[i, j]] == m[[s.0, s.1]] {
-                    q.push_back(((i, j), 0));
+                    q.push_back(((i, j), 0))
                 }
             }
         }

@@ -7,9 +7,8 @@ fn get_data(data: &[String]) -> HashSet<(usize, usize)> {
     let mut rocks = HashSet::new();
     for line in data {
         let coords = line
-            .split_whitespace()
-            .filter(|s| *s != "->")
-            .map(|s| trim_split_on::<usize>(s, ',').unwrap())
+            .split("->")
+            .map(|s| trim_split_on::<usize>(s, ',').expect("comma separated numbers"))
             .collect::<Vec<_>>();
         for p in coords.windows(2) {
             let (x1, y1) = (p[0][0], p[0][1]);
@@ -32,9 +31,9 @@ fn get_data(data: &[String]) -> HashSet<(usize, usize)> {
 
 fn solve(puzzle_lines: &[String], part: usize) -> Result<usize, Box<dyn Error>> {
     let rocks = get_data(puzzle_lines);
-    let mut max_depth = *rocks.iter().map(|(_, y)| y).max().expect("solution");
+    let mut max_depth = *rocks.iter().map(|(_, y)| y).max().expect("max()");
     if part == 2 {
-        max_depth += 2;
+        max_depth += 2
     }
 
     let start = (500, 0);
@@ -44,22 +43,22 @@ fn solve(puzzle_lines: &[String], part: usize) -> Result<usize, Box<dyn Error>> 
         let y = p.1 + 1;
 
         let floor_test = match part {
-            1 => true,
-            _ => y != max_depth,
+            2 => y != max_depth,
+            _ => true,
         };
 
         if floor_test && !blockers.contains(&(p.0, y)) {
-            p = (p.0, y);
+            p = (p.0, y)
         } else if floor_test && !blockers.contains(&(p.0 - 1, y)) {
-            p = (p.0 - 1, y);
+            p = (p.0 - 1, y)
         } else if floor_test && !blockers.contains(&(p.0 + 1, y)) {
-            p = (p.0 + 1, y);
+            p = (p.0 + 1, y)
         } else {
             blockers.insert(p);
             if p == start {
                 break;
             }
-            p = start;
+            p = start
         }
     }
 

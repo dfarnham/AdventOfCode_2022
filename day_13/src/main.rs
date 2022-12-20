@@ -20,14 +20,14 @@ fn get_data(data: &[String]) -> Vec<(List, List)> {
     let mut nums = vec![];
     for line in data {
         if !line.is_empty() {
-            nums.push(json::parse(line).expect("unparsable List"));
+            nums.push(json::parse(line).expect("unparsable List"))
         }
     }
     assert!(nums.len() % 2 == 0);
 
     let mut pairs = vec![];
     for i in (0..nums.len()).step_by(2) {
-        pairs.push((nums[i].clone(), nums[i + 1].clone()));
+        pairs.push((nums[i].clone(), nums[i + 1].clone()))
     }
     pairs
 }

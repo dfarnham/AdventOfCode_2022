@@ -12,7 +12,7 @@ fn count_calories(puzzle_lines: &[String], n: usize) -> Result<u64, Box<dyn Erro
             total = 0;
             continue;
         }
-        total += line.parse::<u64>()?;
+        total += line.parse::<u64>()?
     }
     data.push(total);
 

@@ -18,7 +18,7 @@ fn get_pos(t: (i32, i32), m: (i32, i32)) -> (i32, i32) {
 fn move_head(v: &[(i32, i32)], m: (i32, i32)) -> Vec<(i32, i32)> {
     let mut newvec = vec![m];
     for t in v[1..].iter() {
-        newvec.push(get_pos(*t, *newvec.last().unwrap()));
+        newvec.push(get_pos(*t, *newvec.last().unwrap()))
     }
     newvec
 }

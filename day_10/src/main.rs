@@ -16,7 +16,7 @@ fn get_cycles(puzzle_lines: &[String]) -> Result<Vec<(usize, i32)>, Box<dyn Erro
                 "addx" => {
                     cycles.push((clock, register));
                     register += value.parse::<i32>()?;
-                    clock += 1;
+                    clock += 1
                 }
                 _ => return Err(Box::from(format!("Unknown instr: {instr}"))),
             };
@@ -64,14 +64,14 @@ fn crt(puzzle_lines: &[String]) -> Result<Vec<BTreeSet<usize>>, Box<dyn Error>> 
                     clock += 1;
 
                     register += value.parse::<i32>()?;
-                    sprite = register - 1..=register + 1;
+                    sprite = register - 1..=register + 1
                 }
                 _ => return Err(Box::from(format!("Unknown instr: {instr}"))),
             };
         }
         if clock % crt_width == 0 {
             screen.push(lit.clone());
-            lit.clear();
+            lit.clear()
         }
     }
     Ok(screen)
@@ -80,9 +80,9 @@ fn crt(puzzle_lines: &[String]) -> Result<Vec<BTreeSet<usize>>, Box<dyn Error>> 
 fn display(screen: &Vec<BTreeSet<usize>>) {
     for set in screen {
         for p in 0..40 {
-            print!("{}", if set.contains(&p) { "#" } else { " " });
+            print!("{}", if set.contains(&p) { "#" } else { " " })
         }
-        println!();
+        println!()
     }
 }
 

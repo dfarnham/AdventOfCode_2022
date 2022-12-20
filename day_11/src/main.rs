@@ -76,7 +76,7 @@ fn get_monkeys(puzzle_lines: &[String]) -> Result<Vec<Monkey>, Box<dyn Error>> {
                 .unwrap()
                 .split(',')
                 .map(|n| n.trim().parse::<u64>().unwrap())
-                .collect::<Vec<_>>();
+                .collect::<Vec<_>>()
         } else if operation_re.is_match(line) {
             let captures = operation_re.captures(line).unwrap();
             monkey.operation_op = captures.get(1).map(|s| s.as_str()).unwrap().to_string();
@@ -89,27 +89,27 @@ fn get_monkeys(puzzle_lines: &[String]) -> Result<Vec<Monkey>, Box<dyn Error>> {
                         Some(s.as_str().parse::<u64>().unwrap())
                     }
                 })
-                .unwrap();
+                .unwrap()
         } else if test_re.is_match(line) {
             let captures = test_re.captures(line).unwrap();
             monkey.test = captures
                 .get(1)
                 .map(|s| s.as_str().parse::<u64>().unwrap())
-                .unwrap();
+                .unwrap()
         } else if if_true_re.is_match(line) {
             let captures = if_true_re.captures(line).unwrap();
             monkey.if_true = captures
                 .get(1)
                 .map(|s| s.as_str().parse::<usize>().unwrap())
-                .unwrap();
+                .unwrap()
         } else if if_false_re.is_match(line) {
             let captures = if_false_re.captures(line).unwrap();
             monkey.if_false = captures
                 .get(1)
                 .map(|s| s.as_str().parse::<usize>().unwrap())
-                .unwrap();
+                .unwrap()
         } else if line.trim().is_empty() {
-            monkeys.push(monkey.clone());
+            monkeys.push(monkey.clone())
         }
     }
     monkeys.push(monkey);
@@ -135,11 +135,11 @@ fn inspect(monkeys: &[Monkey], rounds: usize, part: u8) -> Result<usize, Box<dyn
             // monkey business
             for item in monkeys[i].items.clone() {
                 let (j, worry_level) = monkeys[i].calc(item, decrease_worry_factor);
-                monkeys[j].items.push(worry_level % lcm);
+                monkeys[j].items.push(worry_level % lcm)
             }
 
             // all items were thrown
-            monkeys[i].items.clear();
+            monkeys[i].items.clear()
         }
     }
 

@@ -34,7 +34,7 @@ fn part2(puzzle_lines: &[String]) -> Result<u64, Box<dyn Error>> {
         };
         if (i + 1) % 3 == 0 {
             total += value(&set);
-            set.clear();
+            set.clear()
         }
     }
     Ok(total)

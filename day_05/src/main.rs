@@ -13,7 +13,7 @@ fn build_stacks(puzzle_lines: &[String]) -> BTreeMap<usize, Vec<char>> {
             if c != ' ' {
                 //let v = stacks.entry(i).or_insert(vec![]);
                 let v: &mut Vec<char> = stacks.entry(i).or_default();
-                v.insert(0, c);
+                v.insert(0, c)
             }
         }
     }
@@ -54,14 +54,14 @@ fn move_crates(
         for _ in 0..count {
             if let Some(a) = stacks.get_mut(&source) {
                 if challenge == 1 {
-                    tmp.push(a.pop().ok_or("pop() error")?);
+                    tmp.push(a.pop().ok_or("pop() error")?)
                 } else {
-                    tmp.insert(0, a.pop().ok_or("pop() error")?);
+                    tmp.insert(0, a.pop().ok_or("pop() error")?)
                 }
             }
         }
         if let Some(b) = stacks.get_mut(&destination) {
-            b.extend(tmp);
+            b.extend(tmp)
         }
     }
 
@@ -72,11 +72,17 @@ fn move_crates(
         .join(""))
 }
 
-fn part1(puzzle_lines: &[String], stacks: &BTreeMap<usize, Vec<char>>) -> Result<String, Box<dyn Error>> {
+fn part1(
+    puzzle_lines: &[String],
+    stacks: &BTreeMap<usize, Vec<char>>,
+) -> Result<String, Box<dyn Error>> {
     move_crates(puzzle_lines, stacks, 1)
 }
 
-fn part2(puzzle_lines: &[String], stacks: &BTreeMap<usize, Vec<char>>) -> Result<String, Box<dyn Error>> {
+fn part2(
+    puzzle_lines: &[String],
+    stacks: &BTreeMap<usize, Vec<char>>,
+) -> Result<String, Box<dyn Error>> {
     move_crates(puzzle_lines, stacks, 2)
 }
 

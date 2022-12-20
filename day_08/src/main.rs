@@ -18,7 +18,7 @@ fn get_grid(data: &[String]) -> Array2<u32> {
 
     // process data[..]
     for line in data {
-        grid.push_row(ArrayView::from(&get_row(line))).unwrap();
+        grid.push_row(ArrayView::from(&get_row(line))).unwrap()
     }
     grid
 }
@@ -55,7 +55,7 @@ fn scenic_score(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
         for v in vals {
             count += 1;
             if n <= *v {
-                break;
+                break
             }
         }
         count
