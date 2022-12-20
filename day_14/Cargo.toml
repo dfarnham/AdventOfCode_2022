@@ -10,4 +10,3 @@ edition = "2021"
 
 [dependencies]
 general = { path = "../general" }
-json = "0.12.4"
