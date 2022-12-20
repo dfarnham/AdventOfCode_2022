@@ -6,25 +6,23 @@ use std::io::{self, Write};
 fn get_data(data: &[String]) -> HashSet<(usize, usize)> {
     let mut rocks = HashSet::new();
     for line in data {
-        let coords = line
-            .split("->")
+        line.split("->")
             .map(|s| trim_split_on::<usize>(s, ',').expect("comma separated numbers"))
-            .collect::<Vec<_>>();
-        for p in coords.windows(2) {
-            let (x1, y1) = (p[0][0], p[0][1]);
-            let (x2, y2) = (p[1][0], p[1][1]);
-
-            if x1 == x2 {
-                for i in y1.min(y2)..=y1.max(y2) {
-                    rocks.insert((x1, i));
+            .collect::<Vec<_>>()
+            .windows(2)
+            .map(|p| (p[0][0], p[0][1], p[1][0], p[1][1]))
+            .for_each(|(x1, y1, x2, y2)| {
+                if x1 == x2 {
+                    for y in y1.min(y2)..=y1.max(y2) {
+                        rocks.insert((x1, y));
+                    }
+                } else {
+                    assert!(y1 == y2);
+                    for x in x1.min(x2)..=x1.max(x2) {
+                        rocks.insert((x, y1));
+                    }
                 }
-            } else {
-                assert!(y1 == y2);
-                for i in x1.min(x2)..=x1.max(x2) {
-                    rocks.insert((i, y1));
-                }
-            }
-        }
+            });
     }
     rocks
 }
