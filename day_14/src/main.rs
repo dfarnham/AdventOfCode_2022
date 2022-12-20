@@ -6,9 +6,13 @@ use std::io::{self, Write};
 fn get_data(data: &[String]) -> HashSet<(usize, usize)> {
     let mut rocks = HashSet::new();
     for line in data {
+        // ex. "503,4 -> 502,4 -> 502,9 -> 494,9"
         line.split("->")
+            // ex. ["503,4 ", " 502,4 ", " 502,9 ", " 494,9"]
+            //.map(|s| s.split(',').map(|s| s.trim().parse::<usize>().unwrap()).collect::<Vec<_>>())
             .map(|s| trim_split_on::<usize>(s, ',').expect("comma separated numbers"))
             .collect::<Vec<_>>()
+            // ex. [[503, 4], [502, 4], [502, 9], [494, 9]]
             .windows(2)
             .map(|p| (p[0][0], p[0][1], p[1][0], p[1][1]))
             .for_each(|(x1, y1, x2, y2)| {
