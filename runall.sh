@@ -17,15 +17,17 @@ cargo test --release
 #    echo "--------------------"
 #done
 
-for input in $inputs
-do
-    echo "========== INPUT FILES =========="
-    for day in day*
+if [ "$1" == "-v" ]; then
+    for input in $inputs
     do
-        if [ -f "$day/$input" ]; then
-            echo cargo run --bin "$day" --release -- -i "$day/$input"
-            cargo run --bin "$day" --release -- -i "$day/$input"
-            echo "--------------------"
-        fi
+        echo "========== INPUT FILES =========="
+        for day in day*
+        do
+            if [ -f "$day/$input" ]; then
+                echo cargo run --bin "$day" --release -- -i "$day/$input"
+                cargo run --bin "$day" --release -- -i "$day/$input"
+                echo "--------------------"
+            fi
+        done
     done
-done
+fi
