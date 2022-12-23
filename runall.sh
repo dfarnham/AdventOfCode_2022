@@ -17,7 +17,7 @@ cargo test --release
 #    echo "--------------------"
 #done
 
-if [ "$1" == "-v" ]; then
+if [ "$1" = "-v" ]; then
     for input in $inputs
     do
         echo "========== INPUT FILES =========="
