@@ -9,12 +9,13 @@ echo "========== CLIPPY =========="
 cargo clippy
 
 echo "========== TESTS =========="
-for day in day*
-do
-    echo cargo test --bin "$day" --release
-    cargo test --bin "$day" --release
-    echo "--------------------"
-done
+cargo test --release
+#for day in day*
+#do
+#    echo cargo test --bin "$day" --release
+#    cargo test --bin "$day" --release
+#    echo "--------------------"
+#done
 
 for input in $inputs
 do
