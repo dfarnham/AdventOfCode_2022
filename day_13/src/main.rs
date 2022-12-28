@@ -16,7 +16,6 @@ type List = json::JsonValue;
 //    JsonValue.as_u64()
 //    macro array![] to create a new list
 
-
 // consume the input data, returning a Vec of List pairs
 fn get_data(data: &[String]) -> Vec<(List, List)> {
     let lists = data
@@ -28,7 +27,8 @@ fn get_data(data: &[String]) -> Vec<(List, List)> {
     assert!(lists.len() % 2 == 0, "expecting pairs");
 
     // create pairs
-    lists.iter()
+    lists
+        .iter()
         .step_by(2)
         .zip(lists.iter().skip(1).step_by(2))
         .map(|(a, b)| (a.clone(), b.clone()))
@@ -56,7 +56,10 @@ fn compare(left: &List, right: &List) -> Ordering {
             Ordering::Equal
         }
         (l, r) if l.is_number() => compare(&array![l.as_u64()], r),
-        (l, r) => compare(l, &array![r.as_u64()]),
+        (l, r) => {
+            assert!(r.is_number());
+            compare(l, &array![r.as_u64()])
+        }
     }
 }
 
