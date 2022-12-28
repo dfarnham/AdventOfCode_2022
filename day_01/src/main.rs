@@ -31,12 +31,19 @@ fn main() -> Result<(), Box<dyn Error>> {
     // read puzzle data into a list of String
     let puzzle_lines = read_trimmed_data_lines(args.get_one::<std::path::PathBuf>("FILE"))?;
 
+    // start a timer
+    let timer = std::time::Instant::now();
+
     // ==============================================================
 
     let calories = count_calories(&puzzle_lines, 1)?;
     writeln!(stdout, "Answer Part 1 = {}", calories)?;
     let calories = count_calories(&puzzle_lines, 3)?;
     writeln!(stdout, "Answer Part 2 = {}", calories)?;
+
+    if args.get_flag("time") {
+        writeln!(stdout, "Total Runtime: {:?}", timer.elapsed())?;
+    }
     Ok(())
 }
 

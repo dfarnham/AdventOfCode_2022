@@ -114,6 +114,12 @@ pub fn get_args() -> ArgMatches {
                 .short('i')
                 .help("File to read, use '-' for standard input")
                 .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+            Arg::new("time")
+            .short('t')
+            .help("Show runtime")
+            .action(clap::ArgAction::SetTrue)
         );
     app.get_matches_from(env::args().collect::<Vec<String>>())
 }

@@ -157,6 +157,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     // read puzzle data into a list of String
     let puzzle_lines = read_data_lines(args.get_one::<std::path::PathBuf>("FILE"))?;
 
+    // start a timer
+    let timer = std::time::Instant::now();
+
     // ==============================================================
 
     writeln!(stdout, "Answer Part 1 = {}", solve(&puzzle_lines, 2022)?)?;
@@ -165,6 +168,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         "Answer Part 2 = {}",
         solve(&puzzle_lines, 1000000000000)?
     )?;
+
+    if args.get_flag("time") {
+        writeln!(stdout, "Total Runtime: {:?}", timer.elapsed())?;
+    }
     Ok(())
 }
 

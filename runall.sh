@@ -24,8 +24,8 @@ if [ "$1" = "-v" ]; then
         for day in day*
         do
             if [ -f "$day/$input" ]; then
-                echo cargo run --bin "$day" --release -- -i "$day/$input"
-                cargo run --bin "$day" --release -- -i "$day/$input"
+                echo cargo run --bin "$day" --release -- -i "$day/$input" -t
+                cargo run --bin "$day" --release -- -i "$day/$input" -t
                 echo "--------------------"
             fi
         done

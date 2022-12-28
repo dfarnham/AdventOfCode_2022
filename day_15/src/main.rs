@@ -213,6 +213,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     // read puzzle data into a list of String
     let puzzle_lines = read_data_lines(args.get_one::<std::path::PathBuf>("FILE"))?;
 
+    // start a timer
+    let timer = std::time::Instant::now();
+
     // ==============================================================
 
     // guess input is input-example or input-actual by length
@@ -226,6 +229,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     };
     writeln!(stdout, "Answer Part 1 = {}", part1(&puzzle_lines, arg1)?)?;
     writeln!(stdout, "Answer Part 2 = {}", part2(&puzzle_lines, arg2)?)?;
+
+    if args.get_flag("time") {
+        writeln!(stdout, "Total Runtime: {:?}", timer.elapsed())?;
+    }
     Ok(())
 }
 
