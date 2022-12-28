@@ -116,15 +116,14 @@ fn solve(puzzle_lines: &[String], n: usize) -> Result<usize, Box<dyn Error>> {
 
                 highpoint = chamber.iter().map(|(_, y)| *y).max().unwrap();
 
-                // build a creative hash key
-                // unclear what magic should be
-                let magic = 3;
+                // build a creative hash key (unclear to me what a stable magic value should be)
+                let magic = 0;
                 let key = (
                     count % rocks.len(),
                     i,
                     chamber
                         .iter()
-                        .filter(|(_, y)| highpoint - *y < magic)
+                        .filter(|(_, y)| highpoint - *y <= magic)
                         .map(|(x, y)| (*x, highpoint - *y))
                         .collect::<Vec<(_, _)>>(),
                 );
