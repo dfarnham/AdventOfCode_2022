@@ -74,13 +74,12 @@ fn part1(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
 }
 
 fn part2(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
-    let marker1 = array!([[2]]);
-    let marker2 = array!([[6]]);
+    let markers = [array!([[2]]), array!([[6]])];
 
     let mut packets = get_data(puzzle_lines)
         .iter()
         .flat_map(|p| [p.0.clone(), p.1.clone()])
-        .chain([marker1.to_owned(), marker2.to_owned()])
+        .chain(markers.clone())
         .collect::<Vec<_>>();
 
     packets.sort_by(compare);
@@ -88,7 +87,7 @@ fn part2(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
     Ok(packets
         .into_iter()
         .enumerate()
-        .filter(|(_, p)| *p == marker1 || *p == marker2)
+        .filter(|(_, p)| markers.contains(p))
         .map(|(i, _)| i + 1)
         .product())
 }
