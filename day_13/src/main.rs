@@ -6,7 +6,8 @@ use std::io::{self, Write};
 #[macro_use]
 extern crate json;
 
-// using json::JsonValue to consume the input of nested lists
+type List = json::JsonValue;
+// using json::JsonValue as a List abstraction
 //
 // the subset of JsonValue methods/macros used:
 //    JsonValue.is_number()
@@ -15,21 +16,21 @@ extern crate json;
 //    JsonValue.as_u64()
 //    macro array![] to create a new list
 
-type List = json::JsonValue;
 
 // consume the input data, returning a Vec of List pairs
 fn get_data(data: &[String]) -> Vec<(List, List)> {
-    let nums = data
+    let lists = data
         .iter()
         .filter(|line| !line.is_empty())
         .map(|line| json::parse(line).expect("unparsable List"))
         .collect::<Vec<_>>();
 
-    assert!(nums.len() % 2 == 0, "expecting pairs");
+    assert!(lists.len() % 2 == 0, "expecting pairs");
 
-    nums.iter()
+    // create pairs
+    lists.iter()
         .step_by(2)
-        .zip(nums.iter().skip(1).step_by(2))
+        .zip(lists.iter().skip(1).step_by(2))
         .map(|(a, b)| (a.clone(), b.clone()))
         .collect()
 }
