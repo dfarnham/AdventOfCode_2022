@@ -8,65 +8,54 @@ extern crate json;
 
 // using json::JsonValue to consume the input of nested lists
 //
-// the subset of JsonValue used to test for a number, list, or create a list
+// the subset of JsonValue methods/macros used:
 //    JsonValue.is_number()
 //    JsonValue.is_array()
+//    JsonValue.is_null()
+//    JsonValue.as_u64()
 //    macro array![] to create a new list
 
 type List = json::JsonValue;
 
-// consume the input data, returning a Vec of List
+// consume the input data, returning a Vec of List pairs
 fn get_data(data: &[String]) -> Vec<(List, List)> {
-    let mut nums = vec![];
-    for line in data {
-        if !line.is_empty() {
-            nums.push(json::parse(line).expect("unparsable List"))
-        }
-    }
-    assert!(nums.len() % 2 == 0);
+    let nums = data
+        .iter()
+        .filter(|line| !line.is_empty())
+        .map(|line| json::parse(line).expect("unparsable List"))
+        .collect::<Vec<_>>();
 
-    let mut pairs = vec![];
-    for i in (0..nums.len()).step_by(2) {
-        pairs.push((nums[i].clone(), nums[i + 1].clone()))
-    }
-    pairs
-}
+    assert!(nums.len() % 2 == 0, "expecting pairs");
 
-// return the JsonValue as an unsigned integer
-fn jint(n: &json::JsonValue) -> u64 {
-    match *n {
-        json::JsonValue::Number(x) => {
-            let f: f64 = x.into();
-            f as u64
-        }
-        _ => panic!("{}", format!("{}: not a JsonValue::Number", n.dump())),
-    }
+    nums.iter()
+        .step_by(2)
+        .zip(nums.iter().skip(1).step_by(2))
+        .map(|(a, b)| (a.clone(), b.clone()))
+        .collect()
 }
 
 fn compare(left: &List, right: &List) -> Ordering {
-    if left.is_number() && right.is_number() {
-        jint(left).cmp(&jint(right))
-    } else if left.is_array() && right.is_array() {
-        for i in 0..left.len().max(right.len()) {
-            if left[i].is_null() && right[i].is_null() {
-                return Ordering::Equal;
-            } else if left[i].is_null() {
-                return Ordering::Less;
-            } else if right[i].is_null() {
-                return Ordering::Greater;
-            }
+    match (left, right) {
+        (l, r) if l.is_number() && r.is_number() => l.as_u64().cmp(&r.as_u64()),
+        (l, r) if l.is_array() && r.is_array() => {
+            for i in 0..l.len().max(r.len()) {
+                if l[i].is_null() && r[i].is_null() {
+                    return Ordering::Equal;
+                } else if l[i].is_null() {
+                    return Ordering::Less;
+                } else if r[i].is_null() {
+                    return Ordering::Greater;
+                }
 
-            let ordering = compare(&left[i], &right[i]);
-            if ordering != Ordering::Equal {
-                return ordering;
+                let ordering = compare(&l[i], &r[i]);
+                if ordering != Ordering::Equal {
+                    return ordering;
+                }
             }
+            Ordering::Equal
         }
-        Ordering::Equal
-    } else if left.is_number() {
-        compare(&array![jint(left)], right)
-    } else {
-        assert!(right.is_number());
-        compare(left, &array![jint(right)])
+        (l, r) if l.is_number() => compare(&array![l.as_u64()], r),
+        (l, r) => compare(l, &array![r.as_u64()]),
     }
 }
 
@@ -83,11 +72,13 @@ fn part1(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
 fn part2(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
     let marker1 = array!([[2]]);
     let marker2 = array!([[6]]);
-    let mut packets = vec![marker1.clone(), marker2.clone()];
-    for p in get_data(puzzle_lines).iter() {
-        packets.push(p.0.clone());
-        packets.push(p.1.clone());
-    }
+
+    let mut packets = get_data(puzzle_lines)
+        .iter()
+        .flat_map(|p| [p.0.clone(), p.1.clone()])
+        .chain([marker1.to_owned(), marker2.to_owned()])
+        .collect::<Vec<_>>();
+
     packets.sort_by(compare);
 
     Ok(packets
