@@ -1,6 +1,6 @@
 use general::{get_args, read_data_lines, reset_sigpipe};
 use ndarray::*;
-use std::collections::{BTreeSet, VecDeque};
+use std::collections::{HashSet, VecDeque};
 use std::error::Error;
 use std::io::{self, Write};
 
@@ -23,8 +23,9 @@ use std::io::{self, Write};
 fn get_grid(data: &[String]) -> (Array2<usize>, (usize, usize), (usize, usize)) {
     // row parsing rules for lines in data
     //
-    // the puzzle input represents a matrix and is all lowercase
-    // characters except for 'S', 'E' (start, end)
+    // puzzle input represents a matrix of heights by lowercase characters
+    // `start` is 'S' with value 'a'
+    // `end` is 'E' with value 'z'
     // Example:
     //     Sabqponm
     //     abcryxxl
@@ -32,7 +33,7 @@ fn get_grid(data: &[String]) -> (Array2<usize>, (usize, usize), (usize, usize)) 
     //     acctuvwj
     //     abdefghi
     //
-    // after recording the coordinates of 'S', 'E' their values are assigned 'a', 'z'
+    // Reference
     //   ['A', 'Z] == [65, 90]
     //   ['a', 'z'] == [97, 122]
     //
@@ -106,7 +107,7 @@ fn solve(m: &Array2<usize>, s: (usize, usize), e: (usize, usize), part: usize) -
     // m = matrix of heights
     // s = starting coordinate
     // e = ending coordinate goal
-    let mut visited = BTreeSet::<(usize, usize)>::new();
+    let mut visited = HashSet::<(usize, usize)>::new();
 
     // initialize the work queue for bfs with starting position(s) set to 0
     let mut q = VecDeque::new();
