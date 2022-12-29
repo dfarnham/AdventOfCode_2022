@@ -3,16 +3,18 @@ use std::collections::HashSet;
 use std::error::Error;
 use std::io::{self, Write};
 
-fn value(set: &HashSet<char>) -> u64 {
+fn value(set: &HashSet<char>) -> usize {
+    // Lowercase item types a through z have priorities 1 through 26.
+    // Uppercase item types A through Z have priorities 27 through 52.
     set.iter()
         .map(|c| match c.is_lowercase() {
-            true => *c as u64 - 'a' as u64 + 1,
-            false => *c as u64 - 'A' as u64 + 27,
+            true => 1 + *c as usize - 'a' as usize,
+            false => 27 + *c as usize - 'A' as usize,
         })
-        .sum::<u64>()
+        .sum()
 }
 
-fn part1(puzzle_lines: &[String]) -> Result<u64, Box<dyn Error>> {
+fn part1(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
     Ok(puzzle_lines
         .iter()
         .map(|line| {
@@ -20,10 +22,10 @@ fn part1(puzzle_lines: &[String]) -> Result<u64, Box<dyn Error>> {
             let set2: HashSet<char> = line.chars().skip(line.len() / 2).collect();
             value(&set1.intersection(&set2).copied().collect())
         })
-        .sum::<u64>())
+        .sum())
 }
 
-fn part2(puzzle_lines: &[String]) -> Result<u64, Box<dyn Error>> {
+fn part2(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
     let mut total = 0;
     let mut set = HashSet::new();
     for (i, line) in puzzle_lines.iter().enumerate() {
