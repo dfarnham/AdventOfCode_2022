@@ -51,14 +51,10 @@ fn scenic_score(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
     let mut scores = vec![];
 
     fn count_view(n: u32, vals: &Vec<u32>) -> usize {
-        let mut count = 0;
-        for v in vals {
-            count += 1;
-            if n <= *v {
-                break
-            }
+        match vals.iter().position(|v| *v >= n) {
+            Some(c) => c + 1,
+            None => vals.len(),
         }
-        count
     }
 
     for i in 1..dim {
