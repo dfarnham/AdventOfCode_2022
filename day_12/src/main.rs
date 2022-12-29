@@ -4,13 +4,39 @@ use std::collections::{BTreeSet, VecDeque};
 use std::error::Error;
 use std::io::{self, Write};
 
+// parse the input to generate:
+//   1. a 2-d array of unsigned integers
+//   2. the `start` and `end` coordinates
+//
+// data types:
+//   1. the matrix is an ndarray `Array2`
+//   2. the `start` and `end` coordinates are tuples `(usize, usize)`
+//
+// the puzzle is to connect `start` to `end` by transitions (up, down, left, right)
+// and find the shortest path
+//
+// a transition is legal unless the destination (up, down, left right) value
+// is greater than the current value by more than 1
+//
+// the story treats it as hill climbing
+//
 fn get_grid(data: &[String]) -> (Array2<usize>, (usize, usize), (usize, usize)) {
     // row parsing rules for lines in data
-    let get_row = |s: &str| {
-        s.chars()
-            .map(|c| (c as usize) - 'A' as usize)
-            .collect::<Vec<_>>()
-    };
+    //
+    // the puzzle input represents a matrix and is all lowercase
+    // characters except for 'S', 'E' (start, end)
+    // Example:
+    //     Sabqponm
+    //     abcryxxl
+    //     accszExk
+    //     acctuvwj
+    //     abdefghi
+    //
+    // after recording the coordinates of 'S', 'E' their values are assigned 'a', 'z'
+    //   ['A', 'Z] == [65, 90]
+    //   ['a', 'z'] == [97, 122]
+    //
+    let get_row = |s: &str| s.chars().map(|c| (c as usize)).collect::<Vec<_>>();
 
     // use data[0] to size the new Array2
     let mut grid = Array::from_elem((0, data[0].len()), 0);
@@ -20,24 +46,35 @@ fn get_grid(data: &[String]) -> (Array2<usize>, (usize, usize), (usize, usize)) 
         grid.push_row(ArrayView::from(&get_row(line))).unwrap()
     }
 
-    let mut start = (0, 0);
-    let mut end = (0, 0);
-    for i in 0..grid.nrows() {
-        for j in 0..grid.ncols() {
-            if grid[[i, j]] == 'S' as usize - 'A' as usize {
-                start = (i, j);
-                grid[[i, j]] = 'a' as usize - 'A' as usize
-            } else if grid[[i, j]] == 'E' as usize - 'A' as usize {
-                end = (i, j);
-                grid[[i, j]] = 'z' as usize - 'A' as usize
-            }
-        }
-    }
+    // record start and reset 'S' to 'a'
+    let (i, j) = grid
+        .indexed_iter()
+        .find(|(_, v)| *v == &('S' as usize))
+        .expect("to find 'S'")
+        .0;
+    let start = (i, j);
+    grid[[i, j]] = 'a' as usize;
+
+    // record end and reset 'E' to 'z'
+    let (i, j) = grid
+        .indexed_iter()
+        .find(|(_, v)| *v == &('E' as usize))
+        .expect("to find 'E'")
+        .0;
+    let end = (i, j);
+    grid[[i, j]] = 'z' as usize;
+
     assert!(start != end);
     (grid, start, end)
 }
 
-fn neighbor_indices(m: &Array2<usize>, p: (usize, usize)) -> Vec<(usize, usize)> {
+// neighbors matching transition contraint
+//
+// a transition is legal unless the neighbor (up, down, left right) value
+// is greater than the position value by more than 1
+//
+// a list of legal indices is returned
+fn neighbors(m: &Array2<usize>, p: (usize, usize)) -> Vec<(usize, usize)> {
     let (i, j) = p;
     let maxval = m[[i, j]] + 1;
     let mut indices = vec![];
@@ -66,21 +103,21 @@ fn neighbor_indices(m: &Array2<usize>, p: (usize, usize)) -> Vec<(usize, usize)>
 }
 
 fn solve(m: &Array2<usize>, s: (usize, usize), e: (usize, usize), part: usize) -> usize {
+    // m = matrix of heights
+    // s = starting coordinate
+    // e = ending coordinate goal
     let mut visited = BTreeSet::<(usize, usize)>::new();
 
-    // insert the starting position into the queue
+    // initialize the work queue for bfs with starting position(s) set to 0
     let mut q = VecDeque::new();
     if part == 1 {
         q.push_back((s, 0))
     } else {
-        // insert the indicies of all 'm' values matching the value at the
-        // starting indicies (all indicies with value 'a' in this puzzle)
-        for i in 0..m.nrows() {
-            for j in 0..m.ncols() {
-                if m[[i, j]] == m[[s.0, s.1]] {
-                    q.push_back(((i, j), 0))
-                }
-            }
+        let start_value = m[[s.0, s.1]];
+
+        // any/all coordinates matching the start_value
+        for (coord, _) in m.indexed_iter().filter(|(_, v)| *v == &start_value) {
+            q.push_back((coord, 0))
         }
     }
 
@@ -88,12 +125,15 @@ fn solve(m: &Array2<usize>, s: (usize, usize), e: (usize, usize), part: usize) -
         let (p, d) = q.pop_front().expect("bug");
         if !visited.contains(&p) {
             visited.insert(p);
+
+            // when found return the distance
             if p == e {
                 return d;
             }
 
-            for xy in neighbor_indices(m, p).iter().copied() {
-                q.push_back((xy, d + 1))
+            // add neighbors to the work queue, adding +1 to their distance
+            for coord in neighbors(m, p).iter().copied() {
+                q.push_back((coord, d + 1))
             }
         }
     }
