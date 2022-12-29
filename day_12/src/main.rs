@@ -20,7 +20,7 @@ use std::io::{self, Write};
 //
 // the story treats it as hill climbing
 //
-fn get_grid(data: &[String]) -> (Array2<usize>, (usize, usize), (usize, usize)) {
+fn parse_input(data: &[String]) -> (Array2<usize>, (usize, usize), (usize, usize)) {
     // row parsing rules for lines in data
     //
     // puzzle input represents a matrix of heights by lowercase characters
@@ -37,36 +37,36 @@ fn get_grid(data: &[String]) -> (Array2<usize>, (usize, usize), (usize, usize)) 
     //   ['A', 'Z] == [65, 90]
     //   ['a', 'z'] == [97, 122]
     //
-    let get_row = |s: &str| s.chars().map(|c| (c as usize)).collect::<Vec<_>>();
 
     // use data[0] to size the new Array2
-    let mut grid = Array::from_elem((0, data[0].len()), 0);
+    assert!(data[0].len() > 1);
+    let mut mat = Array::from_elem((0, data[0].len()), 0);
 
     // process data[..]
+    let get_row = |s: &str| s.chars().map(|c| (c as usize)).collect::<Vec<_>>();
     for line in data {
-        grid.push_row(ArrayView::from(&get_row(line))).unwrap()
+        mat.push_row(ArrayView::from(&get_row(line))).unwrap()
     }
 
     // record start and reset 'S' to 'a'
-    let (i, j) = grid
+    let (i, j) = mat
         .indexed_iter()
         .find(|(_, v)| *v == &('S' as usize))
         .expect("to find 'S'")
         .0;
     let start = (i, j);
-    grid[[i, j]] = 'a' as usize;
+    mat[[i, j]] = 'a' as usize;
 
     // record end and reset 'E' to 'z'
-    let (i, j) = grid
+    let (i, j) = mat
         .indexed_iter()
         .find(|(_, v)| *v == &('E' as usize))
         .expect("to find 'E'")
         .0;
     let end = (i, j);
-    grid[[i, j]] = 'z' as usize;
+    mat[[i, j]] = 'z' as usize;
 
-    assert!(start != end);
-    (grid, start, end)
+    (mat, start, end)
 }
 
 // neighbors matching transition contraint
@@ -123,7 +123,7 @@ fn solve(m: &Array2<usize>, s: (usize, usize), e: (usize, usize), part: usize) -
     }
 
     while !q.is_empty() {
-        let (p, d) = q.pop_front().expect("bug");
+        let (p, d) = q.pop_front().expect("q bug");
         if !visited.contains(&p) {
             visited.insert(p);
 
@@ -138,16 +138,16 @@ fn solve(m: &Array2<usize>, s: (usize, usize), e: (usize, usize), part: usize) -
             }
         }
     }
-    panic!("oops")
+    panic!("no solution")
 }
 
 fn part1(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
-    let (mat, s, e) = get_grid(puzzle_lines);
+    let (mat, s, e) = parse_input(puzzle_lines);
     Ok(solve(&mat, s, e, 1))
 }
 
 fn part2(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
-    let (mat, s, e) = get_grid(puzzle_lines);
+    let (mat, s, e) = parse_input(puzzle_lines);
     Ok(solve(&mat, s, e, 2))
 }
 
