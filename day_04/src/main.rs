@@ -3,31 +3,31 @@ use std::error::Error;
 use std::io::{self, Write};
 use std::ops::RangeInclusive;
 
-fn ranges(puzzle_lines: &[String]) -> Vec<(RangeInclusive<u64>, RangeInclusive<u64>)> {
+fn ranges(puzzle_lines: &[String]) -> Vec<(RangeInclusive<usize>, RangeInclusive<usize>)> {
     puzzle_lines
         .iter()
         .map(|line| trim_split_on::<String>(line, ',').unwrap())
         .map(|start_end| {
             (
-                trim_split_on::<u64>(&start_end[0], '-').unwrap(),
-                trim_split_on::<u64>(&start_end[1], '-').unwrap(),
+                trim_split_on::<usize>(&start_end[0], '-').unwrap(),
+                trim_split_on::<usize>(&start_end[1], '-').unwrap(),
             )
         })
         .map(|p| (p.0[0]..=p.0[1], p.1[0]..=p.1[1]))
         .collect()
 }
 
-fn part1(puzzle_lines: &[String]) -> Result<u64, Box<dyn Error>> {
+fn part1(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
     Ok(ranges(puzzle_lines)
         .iter()
         .filter(|r| {
             r.1.contains(r.0.start()) && r.1.contains(r.0.end())
                 || r.0.contains(r.1.start()) && r.0.contains(r.1.end())
         })
-        .count() as u64)
+        .count())
 }
 
-fn part2(puzzle_lines: &[String]) -> Result<u64, Box<dyn Error>> {
+fn part2(puzzle_lines: &[String]) -> Result<usize, Box<dyn Error>> {
     Ok(ranges(puzzle_lines)
         .iter()
         .filter(|r| {
@@ -36,7 +36,7 @@ fn part2(puzzle_lines: &[String]) -> Result<u64, Box<dyn Error>> {
                 || r.0.contains(r.1.start())
                 || r.0.contains(r.1.end())
         })
-        .count() as u64)
+        .count())
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
