@@ -16,6 +16,7 @@ impl Item {
     }
 }
 
+#[rustfmt::skip]
 fn build_filesystem_view(commands: &[String]) -> Result<BTreeMap<String, Item>, Box<dyn Error>> {
     let mut fs = BTreeMap::new();
     let mut root = PathBuf::new();
@@ -36,12 +37,8 @@ fn build_filesystem_view(commands: &[String]) -> Result<BTreeMap<String, Item>, 
         if line.starts_with("$ cd") {
             // update path
             match &line[5..] {
-                arg if arg == ".." => {
-                    path.pop();
-                }
-                arg => {
-                    path.push(arg);
-                }
+                arg if arg == ".." => { path.pop(); }
+                arg => { path.push(arg); }
             }
 
             // set the root pointer from the path
