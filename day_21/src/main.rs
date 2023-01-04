@@ -60,7 +60,7 @@ fn solve(
 fn part1(puzzle_lines: &[String]) -> Result<i64, Box<dyn Error>> {
     let (monkey_values, monkey_expressions) = get_data(puzzle_lines);
     let monkey_values = solve("root", &monkey_values, &monkey_expressions);
-    Ok(*monkey_values.get("root").unwrap())
+    Ok(monkey_values["root"])
 }
 
 fn part2(puzzle_lines: &[String]) -> Result<i64, Box<dyn Error>> {
