@@ -26,7 +26,7 @@ fn get_data(data: &[String]) -> (HashMap<String, i64>, HashMap<String, Vec<Strin
 // we have 2 maps
 //   1. monkey_values: key="monkey name", value=concrete i64 from an evaluation.
 //      (pre-populated with all k,v given to us)
-//   2. monkey_exp: key="monkey name", value=["some monkey name", "+-*/", "some monkey name"]
+//   2. monkey_expressions: key="monkey name", value=["some monkey name", "+-*/", "some monkey name"]
 // returns the value for a "monkey name"
 #[rustfmt::skip]
 fn solve(
@@ -63,14 +63,13 @@ fn part1(puzzle_lines: &[String]) -> Result<i64, Box<dyn Error>> {
     Ok(*monkey_values.get("root").unwrap())
 }
 
-#[rustfmt::skip]
 fn part2(puzzle_lines: &[String]) -> Result<i64, Box<dyn Error>> {
     let (values, expressions) = get_data(puzzle_lines);
 
     // save a copy
     let orig_values = values.clone();
 
-    // 
+    //
     // this seems wonky with multiple solutions ???
     // i guess the yell "immediately" means take the lowest
     //
@@ -78,7 +77,7 @@ fn part2(puzzle_lines: &[String]) -> Result<i64, Box<dyn Error>> {
     // grab the 2 monkey names which "root" depends on
     let (ma, mb) = match expressions.get("root") {
         Some(v) => (v[0].to_string(), v[2].to_string()),
-        _ => panic!("oops")
+        _ => panic!("oops"),
     };
 
     // values "ma,mb" are a function of "humn"
@@ -86,7 +85,11 @@ fn part2(puzzle_lines: &[String]) -> Result<i64, Box<dyn Error>> {
     let mut values = solve("root", &values, &expressions);
 
     // determine lo, hi ordering
-    let (ma, mb) = if values[&ma] < values[&mb] { (ma, mb) } else { (mb, ma) };
+    let (ma, mb) = if values[&ma] < values[&mb] {
+        (ma, mb)
+    } else {
+        (mb, ma)
+    };
 
     // take a swag at bounding where to search for "humn" by
     // increasing values["humn"] looking for ma,mb to cross over
@@ -95,7 +98,7 @@ fn part2(puzzle_lines: &[String]) -> Result<i64, Box<dyn Error>> {
     while values[&ma] < values[&mb] {
         prev_humn = values["humn"]; // lower bound on exit
         humn *= 2; // increase upper bound
-        
+
         // evaluate the expressions
         values = orig_values.clone();
         values.insert("humn".to_string(), humn);
@@ -123,9 +126,9 @@ fn part2(puzzle_lines: &[String]) -> Result<i64, Box<dyn Error>> {
         };
     }
 
-    // i'm getting multiple solutions ??? 
+    // i'm getting multiple solutions ???
     let mut solutions = vec![];
-    for wtf in mid-10..mid+10 {
+    for wtf in mid - 10..mid + 10 {
         values = orig_values.clone();
         values.insert("humn".to_string(), wtf);
         values = solve("root", &values, &expressions);
