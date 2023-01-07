@@ -129,7 +129,7 @@ fn solve(puzzle_lines: &[String], n: usize) -> Result<usize, Box<dyn Error>> {
                 );
 
                 if seen.contains_key(&key) {
-                    let (prev_count, prev_highpoint) = seen.get(&key).unwrap();
+                    let (prev_count, prev_highpoint) = seen[&key];
                     let diff_count = count - prev_count;
                     let t = (n - count) / diff_count;
                     count += t * diff_count;

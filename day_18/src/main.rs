@@ -66,8 +66,7 @@ fn interior(
     let mut q = VecDeque::new();
     q.push_back(pos);
 
-    while !q.is_empty() {
-        let c = q.pop_front().expect("q bug");
+    while let Some(c) = q.pop_front() {
         if !cubes.contains(&c) && !seen.contains(&c) {
             let (x, y, z) = c;
             if !minmax.x.contains(&x) && !minmax.y.contains(&y) && !minmax.z.contains(&z) {

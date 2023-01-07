@@ -122,8 +122,7 @@ fn solve(m: &Array2<usize>, s: (usize, usize), e: (usize, usize), part: usize) -
         }
     }
 
-    while !q.is_empty() {
-        let (p, d) = q.pop_front().expect("q bug");
+    while let Some((p, d)) = q.pop_front() {
         if !visited.contains(&p) {
             visited.insert(p);
 
